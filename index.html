@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FARGO RUNS</title>
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      text-align: center;
+      margin: 0;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background-color: #111;
+    }
+  </style>
+</head>
+<body>
+  <h1>🏃 FARGO RUNS 🏃</h1>
+  <p>Use ⬅️ ➡️ to move, SPACE to jump. Collect ❤️ to heal.</p>
+  <canvas id="gameCanvas" width="800" height="400"></canvas>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Player
+    const player = {
+      x: 50,
+      y: 350,
+      width: 20,
+      height: 20,
+      color: "white",
+      dx: 0,
+      dy: 0,
+      jumping: false,
+      health: 100
+    };
+
+    const gravity = 0.5;
+    const jumpPower = -10;
+
+    // Medikit
+    let medikit = {
+      x: 300,
+      y: 330,
+      width: 24,
+      height: 24,
+      collected: false
+    };
+
+    // Controls
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "ArrowRight") player.dx = 3;
+      if (e.code === "ArrowLeft") player.dx = -3;
+      if (e.code === "Space" && !player.jumping) {
+        player.dy = jumpPower;
+        player.jumping = true;
+      }
+    });
+
+    document.addEventListener("keyup", (e) => {
+      if (e.code === "ArrowRight" || e.code === "ArrowLeft") player.dx = 0;
+    });
+
+    // Draw player
+    function drawPlayer() {
+      ctx.fillStyle = player.color;
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+    }
+
+    // Draw medikit
+    function drawMedikit() {
+      if (!medikit.collected) {
+        ctx.font = "24px Arial";
+        ctx.fillText("❤️", medikit.x, medikit.y + 20);
+      }
+    }
+
+    // Draw health bar
+    function drawHealth() {
+      ctx.fillStyle = "red";
+      ctx.fillRect(20, 20, player.health * 2, 20); // Health bar
+      ctx.strokeStyle = "white";
+      ctx.strokeRect(20, 20, 200, 20); // Outline
+      ctx.fillStyle = "white";
+      ctx.font = "14px Arial";
+      ctx.fillText("Health: " + player.health, 230, 35);
+    }
+
+    // Collision check
+    function checkCollision() {
+      if (!medikit.collected &&
+        player.x < medikit.x + medikit.width &&
+        player.x + player.width > medikit.x &&
+        player.y < medikit.y + medikit.height &&
+        player.y + player.height > medikit.y) {
+        
+        medikit.collected = true;
+        player.health = Math.min(player.health + 20, 100);
+      }
+    }
+
+    // Game loop
+    function update() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Move player
+      player.x += player.dx;
+      player.y += player.dy;
+
+      // Gravity
+      if (player.y < 350) {
+        player.dy += gravity;
+      } else {
+        player.y = 350;
+        player.dy = 0;
+        player.jumping = false;
+      }
+
+      drawPlayer();
+      drawMedikit();
+      drawHealth();
+      checkCollision();
+
+      requestAnimationFrame(update);
+    }
+
+    update();
+  </script>
+</body>
+</html>
+
